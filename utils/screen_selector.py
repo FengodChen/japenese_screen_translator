@@ -2,6 +2,8 @@ import cv2 as cv
 import numpy as np
 import torch
 from PIL import ImageGrab
+from multiprocessing import Pipe
+from threading import Thread
 
 class ScreenSelector:
     def __init__(self):
@@ -35,7 +37,7 @@ class ScreenSelector:
             self.__left_buttom_up_pos = (x, y)
             self.__left_button_down_flag = False
     
-    def ui_show(self, windows_name="image"):
+    def select_pos(self, windows_name="image"):
         self.__init_screen_image()
         cv.namedWindow(windows_name, cv.WINDOW_NORMAL)
         cv.setWindowProperty(windows_name, cv.WND_PROP_FULLSCREEN, cv.WINDOW_FULLSCREEN)
@@ -60,10 +62,30 @@ class ScreenSelector:
 
         return (top_left, bottom_right)
 
+def screen_selector_process(pipe_mainGUI):
+    screen_selector = ScreenSelector()
+
+    while True:
+        try:
+            msg = pipe_mainGUI.recv()
+            if msg["comm"] == "start select":
+                screen_selector.select_pos()
+                pos_data = screen_selector.get_screen_pos()
+                msg = dict(
+                    comm = "push pos data",
+                    data = pos_data
+                )
+                pipe_mainGUI.send(msg)
+            elif msg["comm"] == "end":
+                break
+        except Exception as e:
+            print(str(e))
+
+
 
 if __name__ == "__main__":
     ss = ScreenSelector()
-    ss.ui_show()
+    ss.select_pos()
     (p1, p2) = ss.get_screen_pos()
     print(p1)
     print(p2)
