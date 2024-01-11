@@ -20,25 +20,3 @@ class Screen_Cropper:
 
         img = ImageGrab.grab(bbox=(self.__w1, self.__h1, self.__w2, self.__h2))
         return img
-
-
-def screen_cropper_process(pipe_mainGUI, pipe_ocr):
-    screen_cropper = Screen_Cropper()
-
-    while True:
-        try:
-            msg = pipe_mainGUI.recv()
-            if msg["comm"] == "start crop":
-                img = screen_cropper.crop()
-                msg = dict(
-                    comm = "push crop img",
-                    data = img
-                )
-                pipe_mainGUI.send(msg)
-            elif msg["comm"] == "set crop pos":
-                (top_left, bottom_right) = msg["data"]
-                screen_cropper.set_crop_pos(top_left, bottom_right)
-            elif msg["comm"] == "end":
-                break
-        except Exception as e:
-            print(str(e))

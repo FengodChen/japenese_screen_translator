@@ -4,7 +4,7 @@ from threading import Thread, Lock
 class GUI_Main:
     def __init__(self, pipe_screenSelector, pipe_screenCropper):
         self.__pipe_screenSelector = pipe_screenSelector
-        self.__pipe_screenCropper = pipe_screenCropper
+        self.__pipe_orc_and_translate = pipe_screenCropper
 
         self.__create_main_windows()
     
@@ -46,7 +46,7 @@ class GUI_Main:
                     comm = "set crop pos",
                     data = data
                 )
-                self.__pipe_screenCropper.send(msg)
+                self.__pipe_orc_and_translate.send(msg)
                 self.__buttons_start_ocr_and_translate.configure(state="normal")
         except Exception as e:
             print(str(e))
@@ -54,11 +54,11 @@ class GUI_Main:
     def __start_ocr_and_translate(self):
         try:
             msg = dict(
-                comm = "start crop",
+                comm = "start ocr and translate",
                 data = None
             )
-            self.__pipe_screenCropper.send(msg)
-            msg = self.__pipe_screenCropper.recv()
+            self.__pipe_orc_and_translate.send(msg)
+            msg = self.__pipe_orc_and_translate.recv()
             if msg["comm"] == "push crop img":
                 img = msg["data"]
                 print(img)
