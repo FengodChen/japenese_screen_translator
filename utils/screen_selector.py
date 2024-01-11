@@ -3,7 +3,7 @@ import numpy as np
 import torch
 from PIL import ImageGrab
 
-class SreenSelector:
+class ScreenSelector:
     def __init__(self):
         self.__img = None
         self.__img_base = None
@@ -62,7 +62,7 @@ class SreenSelector:
 
 
 if __name__ == "__main__":
-    ss = SreenSelector()
+    ss = ScreenSelector()
     ss.ui_show()
     (p1, p2) = ss.get_screen_pos()
     print(p1)

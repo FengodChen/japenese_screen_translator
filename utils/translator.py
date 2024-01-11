@@ -3,8 +3,8 @@ from torch import Tensor
 from transformers import M2M100ForConditionalGeneration, M2M100Tokenizer
 
 class Translator:
-    def __init__(self, src_lang, target_lang, gpu_num):
-        self.dev = torch.device(f"cuda:{gpu_num}") if gpu_num >= 0 else torch.device("cpu")
+    def __init__(self, src_lang, target_lang, dev):
+        self.dev = dev
 
         self.model = M2M100ForConditionalGeneration.from_pretrained("facebook/m2m100_418M").to(self.dev).eval()
         self.tokenizer = M2M100Tokenizer.from_pretrained("facebook/m2m100_418M")

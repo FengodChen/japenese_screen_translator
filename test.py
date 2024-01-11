@@ -1,15 +1,26 @@
-import numpy as np
-import cv2 as cv
-# mouse callback function
-def draw_circle(event,x,y,flags,param):
-    if event == cv.EVENT_LBUTTONDBLCLK:
-        cv.circle(img,(x,y),100,(255,0,0),-1)
-# Create a black image, a window and bind the function to window
-img = np.zeros((512,512,3), np.uint8)
-cv.namedWindow('image')
-cv.setMouseCallback('image',draw_circle)
-while(1):
-    cv.imshow('image',img)
-    if cv.waitKey(20) & 0xFF == 27:
-        break
-cv.destroyAllWindows()
+import torch
+from utils import Translator, Screen_Cropper, Japenese_OCR, ScreenSelector
+
+dev = torch.device("cuda:0")
+
+ss = ScreenSelector()
+sc = Screen_Cropper()
+ocr = Japenese_OCR(dev=dev)
+tr = Translator(src_lang="ja", target_lang="zh", dev=dev)
+
+while True:
+    ss.ui_show()
+    (top_left, bottom_right) = ss.get_screen_pos()
+
+    sc.set_crop_pos(top_left, bottom_right)
+    img = sc.crop()
+
+    ja_text = ocr.get_text(img)
+
+    zh_text = tr.translate(ja_text)
+
+    print("===========")
+    print(ja_text)
+    print(zh_text)
+    _ = input("Enter to continue")
+
