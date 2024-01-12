@@ -1,4 +1,1 @@
-from .screen_selector import ScreenSelector
-from .screen_cropper import Screen_Cropper
-from .ocr import Japenese_OCR
-from .translator import Translator
+from .processes import gui_main_process, screen_selector_subprocess, orc_translate_subprocess
