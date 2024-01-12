@@ -14,6 +14,9 @@ class GUI_Main:
         self.__font_size = 20
         self.__font_style = "Arial"
 
+        self.__show_ja = True
+        self.__show_zh = True
+
         self.__create_main_windows()
     
     def run(self):
@@ -31,11 +34,27 @@ class GUI_Main:
         self.__font_size -= 2
         self.__font_size = max(0, self.__font_size)
         self.__label_subtitle.configure(font=(self.__font_style, self.__font_size))
+    
+    def __on_click_show_ja(self):
+        if self.__show_ja:
+            self.__show_ja = False
+            self.__buttons_show_ja.configure(text="启用日语")
+        else:
+            self.__show_ja = True
+            self.__buttons_show_ja.configure(text="禁用日语")
+
+    def __on_click_show_zh(self):
+        if self.__show_zh:
+            self.__show_zh = False
+            self.__buttons_show_zh.configure(text="启用中文")
+        else:
+            self.__show_zh = True
+            self.__buttons_show_zh.configure(text="禁用中文")
 
     def __create_main_windows(self):
         self.__main_windows = Tk()
         self.__main_windows.geometry("600x300")
-        self.__main_windows.title("Japenese Screen Translator")
+        self.__main_windows.title("日语屏幕翻译器")
         self.__main_windows.columnconfigure(0, weight=1)
         self.__main_windows.rowconfigure(0, weight=1)
 
@@ -49,7 +68,7 @@ class GUI_Main:
         # Set Button Select Pos
         self.__buttons_start_screenSelector = Button(
             self.__buttom_label,
-            text = "Select Pos",
+            text = "选择翻译区域",
             command = self.__start_screenSelector
         )
         self.__buttons_start_screenSelector.grid(column=0, row=0)
@@ -57,7 +76,7 @@ class GUI_Main:
         # Set Button Run
         self.__buttons_start_ocr_and_translate = Button(
             self.__buttom_label,
-            text = "Run",
+            text = "运行",
             command = self.__start_ocr_and_translate,
             state = "disabled"
         )
@@ -66,7 +85,7 @@ class GUI_Main:
         # Set Button Auto Run
         self.__buttons_auto_run = Button(
             self.__buttom_label,
-            text = "Auto Run",
+            text = "自动运行",
             command = self.__on_click_auto_run,
             state = "disabled"
         )
@@ -74,7 +93,8 @@ class GUI_Main:
 
         # Set Font Setting Layer
         self.__font_setting_layer = Label(
-            self.__buttom_label
+            self.__buttom_label,
+            padx=20
         )
         self.__font_setting_layer.grid(column=3, row=0)
 
@@ -87,7 +107,7 @@ class GUI_Main:
 
         self.__font_setting_hint = Label(
             self.__font_setting_layer,
-            text="Font Size"
+            text="字幕大小"
         )
         self.__font_setting_hint.grid(column=1, row=0)
 
@@ -98,10 +118,26 @@ class GUI_Main:
         )
         self.__buttons_increase_font_size.grid(column=2, row=0)
 
+        # Set Button JA
+        self.__buttons_show_ja = Button(
+            self.__buttom_label,
+            text = "禁用日语",
+            command = self.__on_click_show_ja,
+        )
+        self.__buttons_show_ja.grid(column=4, row=0)
+
+        # Set Button ZH
+        self.__buttons_show_zh = Button(
+            self.__buttom_label,
+            text = "禁用中文",
+            command = self.__on_click_show_zh,
+        )
+        self.__buttons_show_zh.grid(column=5, row=0)
+
         # Set Subtitle Label
         self.__label_subtitle = Label(
             self.__main_windows,
-            text="<subtitle>",
+            text="<字幕区域>",
             font=(self.__font_style, self.__font_size),
             wraplength=600
         )
@@ -139,7 +175,15 @@ class GUI_Main:
                 data = msg["data"]
                 ja_text = data[0]
                 zh_text = data[1]
-                text = f"{ja_text}\n{zh_text}"
+
+                if self.__show_ja and self.__show_zh:
+                    text = f"{ja_text}\n\n{zh_text}"
+                elif self.__show_ja:
+                    text = ja_text
+                elif self.__show_zh:
+                    text = zh_text
+                else:
+                    text = "<设置中即不显示日语也不显示中文>"
                 self.__label_subtitle.configure(text=text, wraplength=self.__get_width())
         except:
             pass
@@ -148,7 +192,7 @@ class GUI_Main:
         if self.__auto_run_flag == True:
             # stop "auto run"
             self.__auto_run_flag = False
-            self.__buttons_auto_run.configure(text="Auto Run")
+            self.__buttons_auto_run.configure(text="自动运行")
             self.__buttons_start_ocr_and_translate.configure(state="normal")
         else:
             # start "auto run"
@@ -158,7 +202,7 @@ class GUI_Main:
                 daemon=True
             )
             self.__auto_run_thread.start()
-            self.__buttons_auto_run.configure(text="Stop")
+            self.__buttons_auto_run.configure(text="停止运行")
             self.__buttons_start_ocr_and_translate.configure(state="disabled")
     
     def __auto_run_task(self):
