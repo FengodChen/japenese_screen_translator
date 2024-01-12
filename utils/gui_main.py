@@ -11,46 +11,101 @@ class GUI_Main:
         self.__auto_run_time = auto_run_time
         self.__auto_run_last_run_time = time.time()
 
+        self.__font_size = 20
+        self.__font_style = "Arial"
+
         self.__create_main_windows()
     
     def run(self):
         self.__main_windows.mainloop()
         self.__end_all()
 
+    def __get_width(self):
+        return self.__main_windows.winfo_width()
+    
+    def __increase_font_size(self):
+        self.__font_size += 2
+        self.__label_subtitle.configure(font=(self.__font_style, self.__font_size))
+
+    def __decrease_font_size(self):
+        self.__font_size -= 2
+        self.__font_size = max(0, self.__font_size)
+        self.__label_subtitle.configure(font=(self.__font_style, self.__font_size))
+
     def __create_main_windows(self):
         self.__main_windows = Tk()
         self.__main_windows.geometry("600x300")
         self.__main_windows.title("Japenese Screen Translator")
+        self.__main_windows.columnconfigure(0, weight=1)
+        self.__main_windows.rowconfigure(0, weight=1)
 
-        # Set Button 1
-        self.__buttons_start_screenSelector = Button(
+        # Set Buttom Lable
+        self.__buttom_label = Label(
             self.__main_windows,
+            pady = 30
+        )
+        self.__buttom_label.grid(column=0, row=1)
+
+        # Set Button Select Pos
+        self.__buttons_start_screenSelector = Button(
+            self.__buttom_label,
             text = "Select Pos",
             command = self.__start_screenSelector
         )
         self.__buttons_start_screenSelector.grid(column=0, row=0)
 
-        # Set Button 2
+        # Set Button Run
         self.__buttons_start_ocr_and_translate = Button(
-            self.__main_windows,
-            text = "Start OCR and Translate",
+            self.__buttom_label,
+            text = "Run",
             command = self.__start_ocr_and_translate,
             state = "disabled"
         )
         self.__buttons_start_ocr_and_translate.grid(column=1, row=0)
 
-        # Set Button 3
+        # Set Button Auto Run
         self.__buttons_auto_run = Button(
-            self.__main_windows,
-            text = "Start Auto Run",
+            self.__buttom_label,
+            text = "Auto Run",
             command = self.__on_click_auto_run,
             state = "disabled"
         )
         self.__buttons_auto_run.grid(column=2, row=0)
 
+        # Set Font Setting Layer
+        self.__font_setting_layer = Label(
+            self.__buttom_label
+        )
+        self.__font_setting_layer.grid(column=3, row=0)
+
+        self.__buttons_decrease_font_size = Button(
+            self.__font_setting_layer,
+            text = "-",
+            command = self.__decrease_font_size
+        )
+        self.__buttons_decrease_font_size.grid(column=0, row=0)
+
+        self.__font_setting_hint = Label(
+            self.__font_setting_layer,
+            text="Font Size"
+        )
+        self.__font_setting_hint.grid(column=1, row=0)
+
+        self.__buttons_increase_font_size = Button(
+            self.__font_setting_layer,
+            text = "+",
+            command = self.__increase_font_size
+        )
+        self.__buttons_increase_font_size.grid(column=2, row=0)
+
         # Set Subtitle Label
-        self.__label_subtitle = Label(self.__main_windows, text="<subtitle>")
-        self.__label_subtitle.grid(column=0, row=1)
+        self.__label_subtitle = Label(
+            self.__main_windows,
+            text="<subtitle>",
+            font=(self.__font_style, self.__font_size),
+            wraplength=600
+        )
+        self.__label_subtitle.grid(column=0, row=0)
     
     def __start_screenSelector(self):
         msg = dict(
@@ -85,7 +140,7 @@ class GUI_Main:
                 ja_text = data[0]
                 zh_text = data[1]
                 text = f"{ja_text}\n{zh_text}"
-                self.__label_subtitle.configure(text=text)
+                self.__label_subtitle.configure(text=text, wraplength=self.__get_width())
         except:
             pass
     
@@ -93,7 +148,7 @@ class GUI_Main:
         if self.__auto_run_flag == True:
             # stop "auto run"
             self.__auto_run_flag = False
-            self.__buttons_auto_run.configure(text="Start Auto Run")
+            self.__buttons_auto_run.configure(text="Auto Run")
             self.__buttons_start_ocr_and_translate.configure(state="normal")
         else:
             # start "auto run"
@@ -103,7 +158,7 @@ class GUI_Main:
                 daemon=True
             )
             self.__auto_run_thread.start()
-            self.__buttons_auto_run.configure(text="Stop Auto Run")
+            self.__buttons_auto_run.configure(text="Stop")
             self.__buttons_start_ocr_and_translate.configure(state="disabled")
     
     def __auto_run_task(self):
